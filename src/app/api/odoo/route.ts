@@ -3,8 +3,8 @@ import xmlrpc from 'xmlrpc';
 
 const ODOO_URL = process.env.NEXT_PUBLIC_ODOO_URL || 'http://localhost:12000';
 const DB = 'odoo-db';
-const USER = 'dudals896@gmail.com';
-const PASS = 'qwer1234!';
+const USER = 'odoo';
+const PASS = 'odoo';
 
 export async function POST(request: NextRequest) {
   try {
