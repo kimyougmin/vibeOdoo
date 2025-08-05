@@ -44,6 +44,12 @@ Odoo HR 모듈을 활용한 현대적인 인사 관리 시스템입니다. Docke
 
 ## 🚀 설치 및 실행git 
 
+#### Git Clone 실행
+```bash
+git clone https://github.com/kimyougmin/vibeOdoo.git
+cd vibeOdoo
+```
+
 #### Docker Compose 설정 확인
 ```bash
 cd backend
