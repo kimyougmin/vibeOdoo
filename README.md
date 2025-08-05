@@ -94,11 +94,32 @@ docker-compose run --rm odoo odoo -i hr,hr_attendance,hr_holidays,hr_skills,hr_o
 
 ### 3. 프론트엔드 실행 (Next.js)
 
-#### 의존성 설치
+#### 환경변수 설정
 ```bash
 # 프로젝트 루트로 이동
 cd ..
 
+# 환경변수 파일 생성
+cp env.example .env.local
+
+# 환경변수 편집 (필요시)
+nano .env.local
+```
+
+#### 환경변수 설정 예시
+```bash
+# .env.local 파일 내용
+NEXT_PUBLIC_ODOO_URL=http://localhost:12000
+ODOO_DATABASE=odoo-db
+ODOO_USERNAME=dudals896@gmail.com
+ODOO_PASSWORD=qwer1234!
+NEXT_PUBLIC_APP_NAME=Odoo HR 관리 시스템
+NEXT_PUBLIC_API_TIMEOUT=10000
+NEXT_PUBLIC_DEBUG=true
+```
+
+#### 의존성 설치
+```bash
 # npm 의존성 설치
 npm install
 

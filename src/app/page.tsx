@@ -21,12 +21,12 @@ export default function Home() {
 
   const initializeOdooAPI = async () => {
     try {
-      // Odoo API 초기화 (실제 환경에서는 환경변수나 설정에서 가져와야 함)
+      // Odoo API 초기화 (환경변수에서 가져옴)
       const auth = {
-        url: 'http://localhost:12000',
-        database: 'odoo-db',
-        username: 'dudals896@gmail.com',
-        password: 'qwer1234!',
+        url: process.env.NEXT_PUBLIC_ODOO_URL || 'http://localhost:12000',
+        database: process.env.ODOO_DATABASE || 'odoo-db',
+        username: process.env.ODOO_USERNAME || 'dudals896@gmail.com',
+        password: process.env.ODOO_PASSWORD || 'qwer1234!',
       };
 
       const api = createOdooAPI(auth);
@@ -71,7 +71,7 @@ export default function Home() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Odoo API에 연결하는 중...</p>
           <p className="mt-2 text-sm text-gray-500">
-            Odoo 서버가 실행 중인지 확인해주세요 (http://localhost:12000)
+            Odoo 서버가 실행 중인지 확인해주세요 ({process.env.NEXT_PUBLIC_ODOO_URL || 'http://localhost:12000'})
           </p>
         </div>
       </div>
@@ -87,7 +87,7 @@ export default function Home() {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Odoo HR 관리 시스템
+                  {process.env.NEXT_PUBLIC_APP_NAME || 'Odoo HR 관리 시스템'}
                 </h1>
               </div>
             </div>
@@ -114,14 +114,6 @@ export default function Home() {
                   부서 관리
                 </button>
               </nav>
-              <span className="text-sm text-gray-500">
-                {viewMode === 'employee-detail' && selectedEmployee 
-                  ? `${selectedEmployee.name} 상세보기`
-                  : viewMode === 'employees' 
-                  ? '직원 관리'
-                  : '부서 관리'
-                }
-              </span>
             </div>
           </div>
         </div>

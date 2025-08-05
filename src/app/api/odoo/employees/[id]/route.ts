@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 import xmlrpc from 'xmlrpc';
 
 const ODOO_URL = process.env.NEXT_PUBLIC_ODOO_URL || 'http://localhost:12000';
-const DB = 'odoo-db';
-const USER = 'dudals896@gmail.com';
-const PASS = 'qwer1234!';
+const DB = process.env.ODOO_DATABASE || 'odoo-db';
+const USER = process.env.ODOO_USERNAME || 'dudals896@gmail.com';
+const PASS = process.env.ODOO_PASSWORD || 'qwer1234!';
 
 export async function GET(
   request: Request,
