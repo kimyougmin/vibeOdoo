@@ -44,6 +44,31 @@ Odoo HR 모듈을 활용한 현대적인 인사 관리 시스템입니다. Docke
 
 ## 🚀 설치 및 실행
 
+### 🚀 빠른 시작 (5분 설정)
+
+```bash
+# 1. 프로젝트 클론
+git clone <repository-url>
+cd odoo-hr-frontend
+
+# 2. 백엔드 완전 초기화
+cd backend
+docker-compose down --volumes 2>/dev/null || true
+docker system prune -f
+docker-compose up -d
+sleep 60
+
+# 3. 데이터베이스 및 모듈 설치
+docker-compose run --rm odoo odoo -i base --database=odoo-db --admin-passwd=admin
+docker-compose run --rm odoo odoo -i hr,hr_attendance,hr_holidays,hr_skills,hr_org_chart,hr_contract --database=odoo-db
+
+# 4. 프론트엔드 설정
+cd ..
+cp env.example .env.local
+npm install
+npm run dev
+```
+
 ### 1. 프로젝트 클론
 
 ```bash
@@ -53,16 +78,51 @@ cd odoo-hr-frontend
 
 ### 2. 백엔드 실행 (Odoo)
 
+#### 🚨 완전 초기화 (기존 데이터 삭제)
+만약 Odoo 웹 인터페이스에서 초기 데이터베이스 설정이 아닌 로그인 화면이 나오거나 문제가 발생하는 경우:
+
+```bash
+# 1. 모든 Docker 컨테이너 및 볼륨 삭제
+docker-compose down --volumes
+docker system prune -f
+
+# 2. Docker 이미지 캐시 삭제 (선택사항)
+docker system prune -a -f
+
+# 3. 백엔드 디렉토리로 이동
+cd backend
+
+# 4. Odoo 서버 완전 초기화
+docker-compose up -d
+
+# 5. 데이터베이스 초기화 대기 (약 1-2분)
+echo "Odoo 서버 시작 중... 잠시 기다려주세요."
+sleep 60
+
+# 6. 기본 모듈 설치
+docker-compose run --rm odoo odoo -i base --database=odoo-db --admin-passwd=admin
+
+# 7. HR 모듈 설치
+docker-compose run --rm odoo odoo -i hr,hr_attendance,hr_holidays,hr_skills,hr_org_chart,hr_contract --database=odoo-db
+
+# 8. 로그 확인
+docker-compose logs -f odoo
+```
+
 #### Docker Compose 설정 확인
 ```bash
 cd backend
 cat docker-compose.yml
 ```
 
-#### Odoo 서버 시작
+#### Odoo 서버 시작 (일반 설치)
 ```bash
 # Docker 컨테이너 시작
 docker-compose up -d
+
+# 서버 시작 대기 (약 30초)
+echo "Odoo 서버 시작 중... 잠시 기다려주세요."
+sleep 30
 
 # 로그 확인
 docker-compose logs -f odoo
@@ -79,9 +139,20 @@ docker-compose run --rm odoo odoo -i hr,hr_attendance,hr_holidays,hr_skills,hr_o
 
 #### Odoo 웹 인터페이스 접속
 - **URL**: `http://localhost:12000`
-- **데이터베이스**: `YOUR_DB_NAME`
-- **이메일**: `YOUR_EMAIL`
-- **비밀번호**: `YOUR_PASSWORD`
+- **데이터베이스**: `odoo-db`
+- **이메일**: `admin`
+- **비밀번호**: `admin`
+
+#### 초기 사용자 설정
+1. `http://localhost:12000` 접속
+2. 데이터베이스 선택: `odoo-db`
+3. 관리자 계정으로 로그인:
+   - **이메일**: `admin`
+   - **비밀번호**: `admin`
+4. 사용자 계정 생성:
+   - **이메일**: `dudals896@gmail.com`
+   - **비밀번호**: `qwer1234!`
+   - **권한**: 관리자 또는 HR 관리자
 
 #### 추가 모듈 설치 (선택사항)
 브라우저에서 `http://localhost:12000` 접속 후 다음 모듈들을 설치:
@@ -226,20 +297,63 @@ docker-compose logs odoo
 
 # 컨테이너 재시작
 docker-compose restart odoo
+
+# 포트 충돌 확인
+lsof -i :12000
 ```
+
+### 데이터베이스 초기화 문제
+```bash
+# 모든 데이터 삭제 후 재시작
+docker-compose down --volumes
+docker system prune -f
+docker-compose up -d
+
+# 데이터베이스 수동 초기화
+docker-compose run --rm odoo odoo -i base --database=odoo-db --admin-passwd=admin
+```
+
+### 로그인 화면이 나오는 경우
+만약 `http://localhost:12000`에 접속했을 때 초기 데이터베이스 설정이 아닌 로그인 화면이 나오는 경우:
+
+1. **완전 초기화 실행**:
+```bash
+cd backend
+docker-compose down --volumes
+docker system prune -f
+docker-compose up -d
+sleep 60
+docker-compose run --rm odoo odoo -i base --database=odoo-db --admin-passwd=admin
+```
+
+2. **브라우저 캐시 삭제**:
+   - 브라우저의 캐시 및 쿠키 삭제
+   - 시크릿 모드로 접속 테스트
+
+3. **다른 포트 사용**:
+   - `docker-compose.yml`에서 포트 변경 (예: 12001:8069)
+   - 환경변수 `NEXT_PUBLIC_ODOO_URL`도 함께 변경
 
 ### 프론트엔드 API 연결 문제
 ```bash
 # API 엔드포인트 테스트
 curl http://localhost:3000/api/odoo/test
 curl http://localhost:3000/api/odoo/employees
+
+# 환경변수 확인
+cat .env.local
+
+# Next.js 서버 재시작
+npm run dev
 ```
 
-### 데이터베이스 초기화
+### 모듈 설치 문제
 ```bash
-# 모든 데이터 삭제 후 재시작
-docker-compose down --volumes
-docker-compose up -d
+# HR 모듈 재설치
+docker-compose run --rm odoo odoo -i hr,hr_attendance,hr_holidays,hr_skills,hr_org_chart,hr_contract --database=odoo-db
+
+# 특정 모듈만 설치
+docker-compose run --rm odoo odoo -i hr_payslip --database=odoo-db
 ```
 
 ## 📸 Vibe 툴 사용 스크린샷
