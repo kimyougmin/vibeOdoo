@@ -48,7 +48,7 @@ Odoo HR 모듈을 활용한 현대적인 인사 관리 시스템입니다. Docke
 
 ```bash
 git clone https://github.com/kimyougmin/vibeOdoo.git
-cd vibeOdoo/odoo-hr-frontend
+cd vibeOdoo
 ```
 
 ### 2. 백엔드 실행 (Odoo)
