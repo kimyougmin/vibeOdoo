@@ -72,8 +72,8 @@ npm run dev
 ### 1. 프로젝트 클론
 
 ```bash
-git clone <repository-url>
-cd odoo-hr-frontend
+git clone https://github.com/kimyougmin/vibeOdoo.git
+cd vibeOdoo
 ```
 
 ### 2. 백엔드 실행 (Odoo)
