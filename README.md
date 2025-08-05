@@ -79,9 +79,9 @@ docker-compose run --rm odoo odoo -i hr,hr_attendance,hr_holidays,hr_skills,hr_o
 
 #### Odoo 웹 인터페이스 접속
 - **URL**: `http://localhost:12000`
-- **데이터베이스**: `odoo-db`
-- **이메일**: `dudals896@gmail.com`
-- **비밀번호**: `qwer1234!`
+- **데이터베이스**: `YOUR_DB_NAME`
+- **이메일**: `YOUR_EMAIL`
+- **비밀번호**: `YOUR_PASSWORD`
 
 #### 추가 모듈 설치 (선택사항)
 브라우저에서 `http://localhost:12000` 접속 후 다음 모듈들을 설치:
