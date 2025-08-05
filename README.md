@@ -42,72 +42,7 @@ Odoo HR 모듈을 활용한 현대적인 인사 관리 시스템입니다. Docke
 - **Node.js** (18.x 이상)
 - **npm** 또는 **yarn**
 
-## 🚀 설치 및 실행
-
-### 🚀 빠른 시작 (5분 설정)
-
-```bash
-# 1. 프로젝트 클론
-git clone https://github.com/kimyougmin/vibeOdoo.git
-cd vibeOdoo
-
-# 2. 백엔드 완전 초기화
-cd backend
-docker-compose down --volumes 2>/dev/null || true
-docker system prune -f
-docker-compose up -d
-sleep 60
-
-# 3. 데이터베이스 및 모듈 설치
-docker-compose run --rm odoo odoo -i base --database=odoo-db --admin-passwd=admin
-docker-compose run --rm odoo odoo -i hr,hr_attendance,hr_holidays,hr_skills,hr_org_chart,hr_contract --database=odoo-db
-
-# 4. 프론트엔드 설정
-cd ..
-cp env.example .env.local
-npm install
-npm run dev
-```
-
-### 1. 프로젝트 클론
-
-```bash
-git clone https://github.com/kimyougmin/vibeOdoo.git
-cd vibeOdoo
-```
-
-### 2. 백엔드 실행 (Odoo)
-
-#### 🚨 완전 초기화 (기존 데이터 삭제)
-만약 Odoo 웹 인터페이스에서 초기 데이터베이스 설정이 아닌 로그인 화면이 나오거나 문제가 발생하는 경우:
-
-```bash
-# 1. 모든 Docker 컨테이너 및 볼륨 삭제
-docker-compose down --volumes
-docker system prune -f
-
-# 2. Docker 이미지 캐시 삭제 (선택사항)
-docker system prune -a -f
-
-# 3. 백엔드 디렉토리로 이동
-cd backend
-
-# 4. Odoo 서버 완전 초기화
-docker-compose up -d
-
-# 5. 데이터베이스 초기화 대기 (약 1-2분)
-echo "Odoo 서버 시작 중... 잠시 기다려주세요."
-sleep 60
-
-# 6. 기본 모듈 설치
-docker-compose run --rm odoo odoo -i base --database=odoo-db --admin-passwd=admin
-
-# 7. HR 모듈 설치
-docker-compose run --rm odoo odoo -i hr,hr_attendance,hr_holidays,hr_skills,hr_org_chart,hr_contract --database=odoo-db
-
-# 8. 로그 확인
-docker-compose logs -f odoo
-```
+## 🚀 설치 및 실행git 
 
 #### Docker Compose 설정 확인
 ```bash
@@ -118,7 +53,10 @@ cat docker-compose.yml
 #### Odoo 서버 시작 (일반 설치)
 ```bash
 # Docker 컨테이너 시작
-docker-compose up -d
+docker-compose down -v
+docker volume prune -f
+docker-compose up --build
+
 
 # 서버 시작 대기 (약 30초)
 echo "Odoo 서버 시작 중... 잠시 기다려주세요."
