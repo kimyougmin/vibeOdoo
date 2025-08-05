@@ -126,11 +126,64 @@ nano .env.local
 # .env.local 파일 내용
 NEXT_PUBLIC_ODOO_URL=http://localhost:12000
 ODOO_DATABASE=odoo-db
-ODOO_USERNAME=dudals896@gmail.com
-ODOO_PASSWORD=qwer1234!
+ODOO_USERNAME=admin
+ODOO_PASSWORD=admin
 NEXT_PUBLIC_APP_NAME=Odoo HR 관리 시스템
 NEXT_PUBLIC_API_TIMEOUT=10000
+NEXT_PUBLIC_API_BASE_URL=/api/odoo
 NEXT_PUBLIC_DEBUG=true
+```
+
+#### 환경변수 필수 설정
+다음 환경변수들이 반드시 설정되어야 합니다:
+- `NEXT_PUBLIC_ODOO_URL`: Odoo 서버 URL
+- `ODOO_DATABASE`: Odoo 데이터베이스 이름
+- `ODOO_USERNAME`: Odoo 사용자명
+- `ODOO_PASSWORD`: Odoo 비밀번호
+- `NEXT_PUBLIC_API_BASE_URL`: API 기본 URL
+- `NEXT_PUBLIC_API_TIMEOUT`: API 타임아웃 (선택사항)
+
+#### 로그인 문제 해결
+만약 로그인에 문제가 있는 경우:
+
+1. **환경변수 확인**:
+```bash
+# .env.local 파일이 존재하는지 확인
+ls -la .env.local
+
+# 환경변수 내용 확인
+cat .env.local
+```
+
+2. **Odoo 사용자 계정 확인**:
+```bash
+# Odoo 웹 인터페이스에서 사용자 계정 생성
+# 1. http://localhost:12000 접속
+# 2. 데이터베이스: odoo-db 선택
+# 3. 관리자 계정으로 로그인:
+#    - 이메일: admin
+#    - 비밀번호: admin
+# 4. 사용자 계정 생성:
+#    - 이메일: admin (또는 원하는 이메일)
+#    - 비밀번호: admin (또는 원하는 비밀번호)
+#    - 권한: 관리자 또는 HR 관리자
+```
+
+3. **환경변수 업데이트**:
+```bash
+# .env.local 파일 편집
+nano .env.local
+
+# 사용자 계정에 맞게 수정
+ODOO_USERNAME=admin
+ODOO_PASSWORD=admin
+```
+
+4. **Next.js 서버 재시작**:
+```bash
+# 개발 서버 중지 (Ctrl+C)
+# 개발 서버 재시작
+npm run dev
 ```
 
 #### 의존성 설치
@@ -278,7 +331,22 @@ docker-compose run --rm odoo odoo -i base --database=odoo-db --admin-passwd=admi
    - `docker-compose.yml`에서 포트 변경 (예: 12001:8069)
    - 환경변수 `NEXT_PUBLIC_ODOO_URL`도 함께 변경
 
-### 프론트엔드 API 연결 문제
+### 환경변수 문제
+```bash
+# 환경변수 파일이 없는 경우
+cp env.example .env.local
+
+# 환경변수 내용 확인
+cat .env.local
+
+# 필수 환경변수 확인
+echo "NEXT_PUBLIC_ODOO_URL: $NEXT_PUBLIC_ODOO_URL"
+echo "ODOO_DATABASE: $ODOO_DATABASE"
+echo "ODOO_USERNAME: $ODOO_USERNAME"
+echo "ODOO_PASSWORD: $ODOO_PASSWORD"
+```
+
+### API 연결 문제
 ```bash
 # API 엔드포인트 테스트
 curl http://localhost:3000/api/odoo/test
@@ -292,50 +360,4 @@ npm run dev
 ```
 
 ### 모듈 설치 문제
-```bash
-# HR 모듈 재설치
-docker-compose run --rm odoo odoo -i hr,hr_attendance,hr_holidays,hr_skills,hr_org_chart,hr_contract --database=odoo-db
-
-# 특정 모듈만 설치
-docker-compose run --rm odoo odoo -i hr_payslip --database=odoo-db
 ```
-
-## 📸 Vibe 툴 사용 스크린샷
-
-### Cursor Pro Vibe 기능 활용
-- **코드 생성**: TypeScript 인터페이스 및 API 엔드포인트 자동 생성
-- **컴포넌트 개발**: React 컴포넌트 구조 및 스타일링 자동 완성
-- **API 통합**: XML-RPC 통신 로직 자동 구현
-- **타입 안전성**: TypeScript 타입 정의 자동 생성
-
-### 주요 Vibe 스크립트
-```typescript
-// 직원 관리 API 생성
-// Vibe: "Odoo XML-RPC API for employee management"
-
-// 부서 관리 컴포넌트 생성  
-// Vibe: "React component for department management with Tailwind CSS"
-
-// TypeScript 타입 정의
-// Vibe: "TypeScript interfaces for Odoo HR modules"
-```
-
-## 🤝 기여하기
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 라이선스
-
-이 프로젝트는 MIT 라이선스 하에 배포됩니다.
-
-## 📞 문의
-
-프로젝트에 대한 문의사항이 있으시면 이슈를 생성해 주세요.
-
----
-
-**Odoo HR 관리 시스템** - 현대적인 인사 관리 솔루션 🚀

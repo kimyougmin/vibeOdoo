@@ -1,13 +1,21 @@
 import { NextResponse } from 'next/server';
 import xmlrpc from 'xmlrpc';
 
-const ODOO_URL = process.env.NEXT_PUBLIC_ODOO_URL || 'http://localhost:12000';
-const DB = process.env.ODOO_DATABASE || 'odoo-db';
-const USER = process.env.ODOO_USERNAME || 'dudals896@gmail.com';
-const PASS = process.env.ODOO_PASSWORD || 'qwer1234!';
+const ODOO_URL = process.env.NEXT_PUBLIC_ODOO_URL;
+const DB = process.env.ODOO_DATABASE;
+const USER = process.env.ODOO_USERNAME;
+const PASS = process.env.ODOO_PASSWORD;
 
 export async function GET(request: Request) {
   try {
+    // 환경변수 검증
+    if (!ODOO_URL || !DB || !USER || !PASS) {
+      return NextResponse.json(
+        { error: '환경변수가 설정되지 않았습니다. .env.local 파일을 확인해주세요.' }, 
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const employeeId = searchParams.get('employeeId');
     const limit = parseInt(searchParams.get('limit') || '20');

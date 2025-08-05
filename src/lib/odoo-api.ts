@@ -20,8 +20,8 @@ class OdooAPI {
     this.auth = auth;
     // Next.js API 라우트를 통해 프록시 접근
     this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || '/api/odoo',
-      timeout: parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || '10000'),
+      baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+      timeout: process.env.NEXT_PUBLIC_API_TIMEOUT ? parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT) : 10000,
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',

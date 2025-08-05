@@ -21,12 +21,23 @@ export default function Home() {
 
   const initializeOdooAPI = async () => {
     try {
+      // 환경변수 검증
+      const url = process.env.NEXT_PUBLIC_ODOO_URL;
+      const database = process.env.ODOO_DATABASE;
+      const username = process.env.ODOO_USERNAME;
+      const password = process.env.ODOO_PASSWORD;
+
+      if (!url || !database || !username || !password) {
+        console.error('환경변수가 설정되지 않았습니다. .env.local 파일을 확인해주세요.');
+        return;
+      }
+
       // Odoo API 초기화 (환경변수에서 가져옴)
       const auth = {
-        url: process.env.NEXT_PUBLIC_ODOO_URL || 'http://localhost:12000',
-        database: process.env.ODOO_DATABASE || 'odoo-db',
-        username: process.env.ODOO_USERNAME || 'dudals896@gmail.com',
-        password: process.env.ODOO_PASSWORD || 'qwer1234!',
+        url,
+        database,
+        username,
+        password,
       };
 
       const api = createOdooAPI(auth);
