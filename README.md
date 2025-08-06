@@ -47,14 +47,22 @@ Odoo HR 모듈을 활용한 현대적인 인사 관리 시스템입니다. Docke
 - **Docker** (최신 버전)
 - **Node.js** (18.x 이상)
 - **npm** 또는 **yarn**
+- **Git** (프로젝트 클론용)
 
-## 🚀 설치 및 실행git 
+## 🚀 설치 및 실행
 
-#### Git Clone 실행
+### 1. 프로젝트 클론
 ```bash
+# GitHub에서 프로젝트 클론
 git clone https://github.com/kimyougmin/vibeOdoo.git
 cd vibeOdoo
+
+# 또는 SSH 사용
+git clone git@github.com:kimyougmin/vibeOdoo.git
+cd vibeOdoo
 ```
+
+### 2. 백엔드 설정 (Odoo)
 
 #### Docker Compose 설정 확인
 ```bash
@@ -62,13 +70,14 @@ cd backend
 cat docker-compose.yml
 ```
 
-#### Odoo 서버 시작 (일반 설치)
+#### Odoo 서버 시작
 ```bash
-# Docker 컨테이너 시작
+# 기존 컨테이너 정리
 docker-compose down -v
 docker volume prune -f
-docker-compose up --build
 
+# Odoo 서버 시작
+docker-compose up --build -d
 
 # 서버 시작 대기 (약 30초)
 echo "Odoo 서버 시작 중... 잠시 기다려주세요."
@@ -79,7 +88,6 @@ docker-compose logs -f odoo
 ```
 
 #### 초기 데이터베이스 설정
-⚠️ mac os 오류일 수 있지만 odoo 모듈이 다운 완료되어도 터미널이 종료되지 않는 현상이 있습니다.  **Base: Auto-vacuum internal data**라는 메시지가 출력되면 종료해도 좋습니다. (control + c) 
 ```bash
 # Odoo 데이터베이스 초기화(backend 파일 레벨에서 실행해야합니다)
 docker-compose run --rm odoo odoo -i base --database=odoo-db --admin-passwd=admin
@@ -87,6 +95,8 @@ docker-compose run --rm odoo odoo -i base --database=odoo-db --admin-passwd=admi
 # HR 모듈 설치
 docker-compose run --rm odoo odoo -i hr,hr_attendance,hr_holidays,hr_skills,hr_org_chart,hr_contract --database=odoo-db
 ```
+
+⚠️ **mac OS 주의사항**: Odoo 모듈이 다운 완료되어도 터미널이 종료되지 않는 현상이 있습니다. **Base: Auto-vacuum internal data**라는 메시지가 출력되면 종료해도 좋습니다. (control + c)
 
 #### Odoo 웹 인터페이스 접속
 - **URL**: `http://localhost:12000`
@@ -115,6 +125,49 @@ docker-compose run --rm odoo odoo -i hr,hr_attendance,hr_holidays,hr_skills,hr_o
 - **Approvals** - 승인 워크플로우
 
 ### 3. 프론트엔드 실행 (Next.js)
+
+#### 백엔드 띄우기 단계 요약
+```bash
+# 1단계: 프로젝트 클론
+git clone https://github.com/kimyougmin/vibeOdoo.git
+cd vibeOdoo
+
+# 2단계: 백엔드 디렉토리 이동
+cd backend
+
+# 3단계: Docker 컨테이너 정리
+docker-compose down -v
+docker volume prune -f
+
+# 4단계: Odoo 서버 시작
+docker-compose up --build -d
+
+# 5단계: 서버 시작 대기 (30초)
+sleep 30
+
+# 6단계: 데이터베이스 초기화
+docker-compose run --rm odoo odoo -i base --database=odoo-db --admin-passwd=admin
+
+# 7단계: HR 모듈 설치
+docker-compose run --rm odoo odoo -i hr,hr_attendance,hr_holidays,hr_skills,hr_org_chart,hr_contract --database=odoo-db
+
+# 8단계: 로그 확인 (선택사항)
+docker-compose logs -f odoo
+```
+
+#### 백엔드 상태 확인
+```bash
+# 컨테이너 상태 확인
+docker-compose ps
+
+# Odoo 서버 접속 테스트
+curl -s http://localhost:12000
+
+# 데이터베이스 연결 테스트
+curl -X POST http://localhost:12000/web/session/authenticate \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"call","params":{"db":"odoo-db","login":"admin","password":"admin"}}'
+```
 
 #### 환경변수 설정
 ```bash
@@ -229,6 +282,43 @@ yarn dev
 #### 프론트엔드 접속
 - **URL**: `http://localhost:3000`
 - 자동으로 Odoo API에 연결됩니다
+
+#### 프론트엔드 실행 단계 요약
+```bash
+# 1단계: 프로젝트 루트로 이동
+cd ..  # backend에서 상위 디렉토리로
+
+# 2단계: 의존성 설치
+npm install
+# 또는 yarn install
+
+# 3단계: 환경변수 설정
+cp env.example .env.local
+
+# 4단계: 환경변수 편집 (필요시)
+nano .env.local
+# 또는
+code .env.local
+
+# 5단계: 개발 서버 시작
+npm run dev
+# 또는 yarn dev
+
+# 6단계: 브라우저에서 접속
+open http://localhost:3000
+```
+
+#### 프론트엔드 상태 확인
+```bash
+# 개발 서버 상태 확인
+curl -s http://localhost:3000
+
+# API 연결 테스트
+curl -s http://localhost:3000/api/odoo/test
+
+# 환경변수 테스트
+curl -s http://localhost:3000/api/env-test
+```
 
 #### CRUD 기능 사용법
 
@@ -360,6 +450,39 @@ odoo-hr-frontend/
 - 급여 계약 정보 관리
 - 급여 구조 및 계산식 구성
 - **급여 CRUD 기능**: 급여 계약 생성, 수정, 삭제
+
+## 🛠 개발 도구
+
+### Cursor Pro (Vibe Coding) 사용
+이 프로젝트는 **Cursor Pro**의 **Vibe Coding** 기능을 활용하여 개발되었습니다.
+
+#### Vibe 스크립트 파일
+프로젝트에 포함된 `vibe-scripts.md` 파일에서 사용된 Vibe 스크립트를 확인할 수 있습니다:
+
+```bash
+# Vibe 스크립트 확인
+cat vibe-scripts.md
+```
+
+#### 주요 Vibe 스크립트 예시
+1. **Odoo API 클라이언트 생성**
+2. **React 컴포넌트 생성**
+3. **TypeScript 타입 정의**
+4. **API 엔드포인트 생성**
+5. **CRUD 기능 구현**
+
+#### Vibe Coding 사용법
+1. **Cursor Pro** 설치
+2. **Vibe 모드** 활성화
+3. **프롬프트 작성** 및 **코드 생성**
+4. **생성된 코드 검토** 및 **수정**
+
+#### Vibe 스크립트 특징
+- **AI 기반 코드 생성**
+- **TypeScript 타입 안전성**
+- **React 컴포넌트 자동 생성**
+- **API 엔드포인트 자동 생성**
+- **CRUD 기능 자동 구현**
 
 ## 🔍 문제 해결
 
