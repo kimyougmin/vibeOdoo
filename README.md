@@ -79,8 +79,9 @@ docker-compose logs -f odoo
 ```
 
 #### 초기 데이터베이스 설정
+⚠️ mac os 오류일 수 있지만 odoo 모듈이 다운 완료되어도 터미널이 종료되지 않는 현상이 있습니다.  **Base: Auto-vacuum internal data**라는 메시지가 출력되면 종료해도 좋습니다. (control + c) 
 ```bash
-# Odoo 데이터베이스 초기화
+# Odoo 데이터베이스 초기화(backend 파일 레벨에서 실행해야합니다)
 docker-compose run --rm odoo odoo -i base --database=odoo-db --admin-passwd=admin
 
 # HR 모듈 설치
