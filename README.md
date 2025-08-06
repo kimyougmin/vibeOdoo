@@ -134,6 +134,21 @@ NEXT_PUBLIC_API_BASE_URL=/api/odoo
 NEXT_PUBLIC_DEBUG=true
 ```
 
+#### 환경변수 파일 생성
+```bash
+# 환경변수 파일 생성
+cp env.example .env.local
+
+# 또는 직접 생성
+touch .env.local
+```
+
+#### dotenv 설정 확인
+프로젝트는 dotenv를 사용하여 .env.local 파일을 자동으로 로드합니다:
+- ✅ **Next.js 설정**: `next.config.ts`에서 dotenv 설정
+- ✅ **API 라우트**: `src/lib/env.ts`에서 환경변수 로딩
+- ✅ **환경변수 검증**: 필수 환경변수 자동 검증
+
 #### 환경변수 필수 설정
 다음 환경변수들이 반드시 설정되어야 합니다:
 - `NEXT_PUBLIC_ODOO_URL`: Odoo 서버 URL
@@ -346,18 +361,20 @@ echo "ODOO_USERNAME: $ODOO_USERNAME"
 echo "ODOO_PASSWORD: $ODOO_PASSWORD"
 ```
 
-### API 연결 문제
+### dotenv 로딩 문제
 ```bash
-# API 엔드포인트 테스트
-curl http://localhost:3000/api/odoo/test
-curl http://localhost:3000/api/odoo/employees
+# dotenv 패키지 설치 확인
+npm list dotenv
 
-# 환경변수 확인
-cat .env.local
+# .env.local 파일 경로 확인
+ls -la .env.local
 
 # Next.js 서버 재시작
 npm run dev
+
+# 환경변수 로딩 테스트
+curl http://localhost:3000/api/odoo/test
 ```
 
-### 모듈 설치 문제
+### API 연결 문제
 ```

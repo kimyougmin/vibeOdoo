@@ -1,20 +1,11 @@
 import { NextResponse } from 'next/server';
 import xmlrpc from 'xmlrpc';
-
-const ODOO_URL = process.env.NEXT_PUBLIC_ODOO_URL;
-const DB = process.env.ODOO_DATABASE;
-const USER = process.env.ODOO_USERNAME;
-const PASS = process.env.ODOO_PASSWORD;
+import { getOdooConfig } from '@/lib/env';
 
 export async function GET() {
   try {
-    // 환경변수 검증
-    if (!ODOO_URL || !DB || !USER || !PASS) {
-      return NextResponse.json(
-        { error: '환경변수가 설정되지 않았습니다. .env.local 파일을 확인해주세요.' }, 
-        { status: 500 }
-      );
-    }
+    // 환경변수에서 Odoo 설정 가져오기
+    const { url: ODOO_URL, database: DB, username: USER, password: PASS } = getOdooConfig();
 
     console.log('XML-RPC 부서 조회 시작');
     

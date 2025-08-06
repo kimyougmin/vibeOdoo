@@ -1,7 +1,6 @@
 import axios from 'axios';
+import { getEnvVar } from '@/lib/env';
 import { 
-  OdooAuth, 
-  OdooResponse, 
   Employee, 
   Department, 
   Attendance, 
@@ -12,7 +11,20 @@ import {
   Holiday
 } from '@/types/odoo';
 
-class OdooAPI {
+export interface OdooAuth {
+  url: string;
+  database: string;
+  username: string;
+  password: string;
+}
+
+export interface OdooResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+export class OdooAPI {
   private client: any;
   private auth: OdooAuth;
 
@@ -20,7 +32,7 @@ class OdooAPI {
     this.auth = auth;
     // Next.js API 라우트를 통해 프록시 접근
     this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+      baseURL: getEnvVar('NEXT_PUBLIC_API_BASE_URL'),
       timeout: process.env.NEXT_PUBLIC_API_TIMEOUT ? parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT) : 10000,
       headers: {
         'Content-Type': 'application/json',
