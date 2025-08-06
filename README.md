@@ -9,6 +9,8 @@ Odoo HR 모듈을 활용한 현대적인 인사 관리 시스템입니다. Docke
 - **직원 목록 조회** - 모든 직원 정보 표시
 - **직원 상세 정보** - 개인정보, 부서, 직무 등
 - **부서 관리** - 부서 목록 및 구조 관리
+- **직원 CRUD 기능** - 직원 생성, 수정, 삭제
+- **부서 CRUD 기능** - 부서 생성, 수정, 삭제
 
 ### 근태 관리
 - **Attendance 모듈** - 출근/퇴근 기록 자동화
@@ -18,10 +20,14 @@ Odoo HR 모듈을 활용한 현대적인 인사 관리 시스템입니다. Docke
 ### 조직도/부서 관리
 - **Department 모듈** - 사용자 정의 조직 트리
 - **부서별 직원 관리** - 부서별 직원 수 표시
+- **조직도 CRUD 기능** - 조직 생성, 수정, 삭제
+- **직원 배치 기능** - 부서에 직원 배치
+- **조직도 통계** - 총 직원 수, 성별 분포, 평균 급여
 
 ### 근로계약 관리
 - **Contract 모듈** - 근로계약 정보 관리
 - **계약 정보 조회** - 계약 기간, 급여 등
+- **급여 CRUD 기능** - 급여 계약 생성, 수정, 삭제
 
 ## 🛠 기술 스택
 
@@ -223,6 +229,33 @@ yarn dev
 - **URL**: `http://localhost:3000`
 - 자동으로 Odoo API에 연결됩니다
 
+#### CRUD 기능 사용법
+
+**1. 직원 관리**
+- **직원 목록**: 사이드바에서 "직원 관리" 선택
+- **새 직원 추가**: "새 직원 추가" 버튼 클릭
+- **직원 수정**: 직원 목록에서 "수정" 버튼 클릭
+- **직원 삭제**: 직원 목록에서 "삭제" 버튼 클릭
+
+**2. 부서 관리**
+- **부서 목록**: 사이드바에서 "부서 관리" 선택
+- **새 부서 추가**: "새 부서 추가" 버튼 클릭
+- **부서 수정**: 부서 목록에서 "수정" 버튼 클릭
+- **부서 삭제**: 부서 목록에서 "삭제" 버튼 클릭
+
+**3. 조직도 관리**
+- **조직도 보기**: 사이드바에서 "조직도 관리" 선택
+- **새 부서 생성**: "새 부서 생성" 버튼 클릭
+- **부서 상세보기**: 각 부서의 "상세보기" 버튼 클릭
+- **직원 배치**: 부서 생성/수정 시 상위 부서 설정
+- **조직도 통계**: 총 직원 수, 성별 분포, 평균 급여 확인
+
+**4. 급여 관리**
+- **급여 목록**: 사이드바에서 "급여 관리" 선택
+- **새 급여 계약**: "새 급여 계약" 버튼 클릭
+- **급여 수정**: 급여 목록에서 "수정" 버튼 클릭
+- **급여 삭제**: 급여 목록에서 "삭제" 버튼 클릭
+
 ## 📁 프로젝트 구조
 
 ```
@@ -260,9 +293,15 @@ odoo-hr-frontend/
 ### 직원 관리
 - `GET /api/odoo/employees` - 직원 목록 조회
 - `GET /api/odoo/employees/[id]` - 직원 상세 정보 조회
+- `POST /api/odoo/employees` - 직원 생성
+- `PUT /api/odoo/employees/[id]` - 직원 수정
+- `DELETE /api/odoo/employees/[id]` - 직원 삭제
 
 ### 부서 관리
 - `GET /api/odoo/departments` - 부서 목록 조회
+- `POST /api/odoo/departments` - 부서 생성
+- `PUT /api/odoo/departments/[id]` - 부서 수정
+- `DELETE /api/odoo/departments/[id]` - 부서 삭제
 
 ### 근로계약 관리
 - `GET /api/odoo/contracts?employeeId=[id]` - 근로계약 조회
@@ -275,27 +314,51 @@ odoo-hr-frontend/
 
 ### 급여 관리
 - `GET /api/odoo/payroll?employeeId=[id]` - 급여 정보 조회
+- `POST /api/odoo/payroll` - 급여 계약 생성
+- `PUT /api/odoo/payroll/[id]` - 급여 계약 수정
+- `DELETE /api/odoo/payroll/[id]` - 급여 계약 삭제
+
+### 통계 및 대시보드
+- `GET /api/odoo/stats` - 대시보드 통계 조회
+- `GET /api/odoo/jobs` - 직무 목록 조회
 
 ## 🎯 주요 기능 설명
 
 ### 1. 통합 대시보드
 - 총 직원 수, 부서 수, 출근 현황, 연차 현황 표시
 - 실시간 데이터 업데이트
+- 조직도 통계 (총 직원 수, 성별 분포, 평균 급여)
 
 ### 2. 직원 관리
 - 직원 목록 조회 및 검색
 - 직원 상세 정보 (개인정보, 부서, 직무)
 - 근태 기록, 연차 정보, 급여 정보 탭
+- **직원 CRUD 기능**: 생성, 수정, 삭제
+- **직원 배치**: 부서에 직원 배치
 
 ### 3. 부서 관리
 - 부서 목록 및 구조 관리
 - 부서별 직원 수 표시
 - 조직도 시각화
+- **부서 CRUD 기능**: 생성, 수정, 삭제
+- **부서 계층 구조**: 상위 부서 설정
 
-### 4. 근태 관리
+### 4. 조직도 관리
+- 조직도 트리 구조 표시
+- 부서별 소속 직원 목록
+- **조직도 CRUD 기능**: 부서 생성, 수정, 삭제
+- **직원 배치 기능**: 부서에 직원 배치
+- **조직도 통계**: 총 직원 수, 성별 분포, 평균 급여
+
+### 5. 근태 관리
 - 출근/퇴근 기록 자동화
 - 근무 시간 계산
 - 연차/휴가 신청 및 관리
+
+### 6. 급여 관리
+- 급여 계약 정보 관리
+- 급여 구조 및 계산식 구성
+- **급여 CRUD 기능**: 급여 계약 생성, 수정, 삭제
 
 ## 🔍 문제 해결
 
@@ -377,4 +440,66 @@ curl http://localhost:3000/api/odoo/test
 ```
 
 ### API 연결 문제
+
+#### CRUD 기능 문제 해결
+
+**1. 부서 추가 기능이 작동하지 않는 경우**
+```bash
+# 환경변수 확인
+cat .env.local
+
+# Odoo 인증 테스트
+curl -s http://localhost:12000/web/session/authenticate \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"call","params":{"db":"odoo","login":"admin","password":"admin"}}'
+
+# 부서 API 테스트
+curl -s http://localhost:3000/api/odoo/departments
+
+# 부서 생성 테스트
+curl -X POST http://localhost:3000/api/odoo/departments \
+  -H "Content-Type: application/json" \
+  -d '{"name":"테스트팀","complete_name":"테스트팀"}'
+```
+
+**2. 직원 관리 기능 문제**
+```bash
+# 직원 API 테스트
+curl -s http://localhost:3000/api/odoo/employees
+
+# 직원 생성 테스트
+curl -X POST http://localhost:3000/api/odoo/employees \
+  -H "Content-Type: application/json" \
+  -d '{"name":"홍길동","work_email":"hong@example.com"}'
+```
+
+**3. 조직도 관리 문제**
+```bash
+# 조직도 통계 API 테스트
+curl -s http://localhost:3000/api/odoo/stats
+
+# 직무 목록 API 테스트
+curl -s http://localhost:3000/api/odoo/jobs
+```
+
+**4. 데이터베이스 문제**
+```bash
+# Odoo에서 직접 데이터 확인
+curl -X POST http://localhost:12000/xmlrpc/2/object \
+  -H "Content-Type: text/xml" \
+  -d '<?xml version="1.0"?><methodCall><methodName>execute</methodName><params><param><value><string>odoo</string></value></param><param><value><int>2</int></value></param><param><value><string>admin</string></value></param><param><value><string>hr.department</string></value></param><param><value><string>search_read</string></value></param><param><value><array><data></data></array></value></param><param><value><array><data><value><string>id</string></value><value><string>name</string></value><value><string>complete_name</string></value></data></array></value></param></params></methodCall>'
+```
+
+**5. 환경변수 문제 해결**
+```bash
+# .env.local 파일 재생성
+rm .env.local
+cp env.example .env.local
+
+# 환경변수 수정
+sed -i '' 's/NEXT_PUBLIC_ODOO_USERNAME=wkqk896@naver.com/NEXT_PUBLIC_ODOO_USERNAME=admin/' .env.local
+sed -i '' 's/NEXT_PUBLIC_ODOO_PASSWORD=qwer1234!/NEXT_PUBLIC_ODOO_PASSWORD=admin/' .env.local
+
+# Next.js 서버 재시작
+npm run dev
 ```

@@ -32,7 +32,7 @@ export class OdooAPI {
     this.auth = auth;
     // Next.js API 라우트를 통해 프록시 접근
     this.client = axios.create({
-      baseURL: getEnvVar('NEXT_PUBLIC_API_BASE_URL'),
+      baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || '/api/odoo',
       timeout: process.env.NEXT_PUBLIC_API_TIMEOUT ? parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT) : 10000,
       headers: {
         'Content-Type': 'application/json',
@@ -101,7 +101,13 @@ export class OdooAPI {
       const result = await response.json();
       console.log('직원 목록 조회 결과:', result);
       
-      return result || [];
+      // API 응답에서 data 필드를 추출
+      if (result.success && Array.isArray(result.data)) {
+        return result.data;
+      } else {
+        console.error('직원 데이터가 올바르지 않습니다:', result);
+        return [];
+      }
     } catch (error) {
       console.error('직원 목록 조회 실패:', error);
       return [];
@@ -109,11 +115,11 @@ export class OdooAPI {
   }
 
   // 직원 상세 정보 조회
-  async getEmployee(id: number): Promise<Employee | null> {
+  async getEmployee(employeeId: number): Promise<Employee | null> {
     try {
-      console.log('직원 상세 정보 조회 시작:', id);
+      console.log('직원 상세 정보 조회 시작:', employeeId);
       
-      const response = await fetch(`/api/odoo/employees/${id}`);
+      const response = await fetch(`/api/odoo/employees/${employeeId}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -122,7 +128,13 @@ export class OdooAPI {
       const result = await response.json();
       console.log('직원 상세 정보 조회 결과:', result);
       
-      return result;
+      // API 응답에서 data 필드를 추출
+      if (result.success && result.data) {
+        return result.data;
+      } else {
+        console.error('직원 데이터가 올바르지 않습니다:', result);
+        return null;
+      }
     } catch (error) {
       console.error('직원 상세 정보 조회 실패:', error);
       return null;
@@ -130,47 +142,53 @@ export class OdooAPI {
   }
 
   // 직원 생성
-  async createEmployee(employeeData: Partial<Employee>): Promise<number | null> {
+  async createEmployee(data: any): Promise<boolean> {
     try {
-      const response = await this.client.post('', {
-        endpoint: '/web/dataset/call_kw',
-        data: {
-          jsonrpc: '2.0',
-          method: 'call',
-          params: {
-            model: 'hr.employee',
-            method: 'create',
-            args: [employeeData],
-            kwargs: {}
-          }
-        }
+      console.log('직원 생성 시작:', data);
+      
+      const response = await fetch('/api/odoo/employees', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      return response.data.result || null;
+      const result = await response.json();
+      console.log('직원 생성 결과:', result);
+      
+      return result.success || false;
     } catch (error) {
       console.error('직원 생성 실패:', error);
-      return null;
+      return false;
     }
   }
 
   // 직원 수정
-  async updateEmployee(id: number, employeeData: Partial<Employee>): Promise<boolean> {
+  async updateEmployee(employeeId: number, data: any): Promise<boolean> {
     try {
-      const response = await this.client.post('', {
-        endpoint: '/web/dataset/call_kw',
-        data: {
-          jsonrpc: '2.0',
-          method: 'call',
-          params: {
-            model: 'hr.employee',
-            method: 'write',
-            args: [[id], employeeData],
-            kwargs: {}
-          }
-        }
+      console.log('직원 수정 시작:', employeeId, data);
+      
+      const response = await fetch(`/api/odoo/employees/${employeeId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      return response.data.result || false;
+      const result = await response.json();
+      console.log('직원 수정 결과:', result);
+      
+      return result.success || false;
     } catch (error) {
       console.error('직원 수정 실패:', error);
       return false;
@@ -178,23 +196,22 @@ export class OdooAPI {
   }
 
   // 직원 삭제
-  async deleteEmployee(id: number): Promise<boolean> {
+  async deleteEmployee(employeeId: number): Promise<boolean> {
     try {
-      const response = await this.client.post('', {
-        endpoint: '/web/dataset/call_kw',
-        data: {
-          jsonrpc: '2.0',
-          method: 'call',
-          params: {
-            model: 'hr.employee',
-            method: 'unlink',
-            args: [[id]],
-            kwargs: {}
-          }
-        }
+      console.log('직원 삭제 시작:', employeeId);
+      
+      const response = await fetch(`/api/odoo/employees/${employeeId}`, {
+        method: 'DELETE',
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      return response.data.result || false;
+      const result = await response.json();
+      console.log('직원 삭제 결과:', result);
+      
+      return result.success || false;
     } catch (error) {
       console.error('직원 삭제 실패:', error);
       return false;
@@ -215,10 +232,93 @@ export class OdooAPI {
       const result = await response.json();
       console.log('부서 목록 조회 결과:', result);
       
-      return result || [];
+      // API 응답에서 data 필드를 추출
+      if (result.success && Array.isArray(result.data)) {
+        return result.data;
+      } else {
+        console.error('부서 데이터가 올바르지 않습니다:', result);
+        return [];
+      }
     } catch (error) {
       console.error('부서 목록 조회 실패:', error);
       return [];
+    }
+  }
+
+  // 부서 생성
+  async createDepartment(data: any): Promise<boolean> {
+    try {
+      console.log('부서 생성 시작:', data);
+      
+      const response = await fetch('/api/odoo/departments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('부서 생성 결과:', result);
+      
+      return result.success || false;
+    } catch (error) {
+      console.error('부서 생성 실패:', error);
+      return false;
+    }
+  }
+
+  // 부서 수정
+  async updateDepartment(departmentId: number, data: any): Promise<boolean> {
+    try {
+      console.log('부서 수정 시작:', departmentId, data);
+      
+      const response = await fetch(`/api/odoo/departments/${departmentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('부서 수정 결과:', result);
+      
+      return result.success || false;
+    } catch (error) {
+      console.error('부서 수정 실패:', error);
+      return false;
+    }
+  }
+
+  // 부서 삭제
+  async deleteDepartment(departmentId: number): Promise<boolean> {
+    try {
+      console.log('부서 삭제 시작:', departmentId);
+      
+      const response = await fetch(`/api/odoo/departments/${departmentId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('부서 삭제 결과:', result);
+      
+      return result.success || false;
+    } catch (error) {
+      console.error('부서 삭제 실패:', error);
+      return false;
     }
   }
 
@@ -304,17 +404,11 @@ export class OdooAPI {
   }
 
   // 급여 정보 조회
-  async getPayrolls(employeeId?: number, limit: number = 20): Promise<Payroll[]> {
+  async getPayrolls(employeeId?: number, limit: number = 20): Promise<any[]> {
     try {
-      console.log('급여 정보 조회 시작:', employeeId);
+      console.log('급여 정보 조회 시작');
       
-      const params = new URLSearchParams();
-      if (employeeId) {
-        params.append('employeeId', employeeId.toString());
-      }
-      params.append('limit', limit.toString());
-      
-      const response = await fetch(`/api/odoo/payroll?${params.toString()}`);
+      const response = await fetch('/api/odoo/payroll');
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -323,9 +417,150 @@ export class OdooAPI {
       const result = await response.json();
       console.log('급여 정보 조회 결과:', result);
       
-      return result || [];
+      // API 응답에서 data 필드를 추출
+      if (result.success && Array.isArray(result.data)) {
+        return result.data;
+      } else {
+        console.error('급여 데이터가 올바르지 않습니다:', result);
+        return [];
+      }
     } catch (error) {
       console.error('급여 정보 조회 실패:', error);
+      return [];
+    }
+  }
+
+  // 급여 계약 생성
+  async createPayroll(data: any): Promise<boolean> {
+    try {
+      console.log('급여 계약 생성 시작:', data);
+      
+      const response = await fetch('/api/odoo/payroll', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('급여 계약 생성 결과:', result);
+      
+      return result.success || false;
+    } catch (error) {
+      console.error('급여 계약 생성 실패:', error);
+      return false;
+    }
+  }
+
+  // 급여 계약 수정
+  async updatePayroll(payrollId: number, data: any): Promise<boolean> {
+    try {
+      console.log('급여 계약 수정 시작:', payrollId, data);
+      
+      const response = await fetch(`/api/odoo/payroll/${payrollId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('급여 계약 수정 결과:', result);
+      
+      return result.success || false;
+    } catch (error) {
+      console.error('급여 계약 수정 실패:', error);
+      return false;
+    }
+  }
+
+  // 급여 계약 삭제
+  async deletePayroll(payrollId: number): Promise<boolean> {
+    try {
+      console.log('급여 계약 삭제 시작:', payrollId);
+      
+      const response = await fetch(`/api/odoo/payroll/${payrollId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('급여 계약 삭제 결과:', result);
+      
+      return result.success || false;
+    } catch (error) {
+      console.error('급여 계약 삭제 실패:', error);
+      return false;
+    }
+  }
+
+  // 통계 데이터 조회
+  async getStats(): Promise<{
+    totalEmployees: number;
+    totalDepartments: number;
+    todayAttendances: number;
+    todayLeaves: number;
+  } | null> {
+    try {
+      console.log('통계 데이터 조회 시작');
+      
+      const response = await fetch('/api/odoo/stats');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('통계 데이터 조회 결과:', result);
+      
+      // API 응답에서 data 필드를 추출
+      if (result.success && result.data) {
+        return result.data;
+      } else {
+        console.error('통계 데이터가 올바르지 않습니다:', result);
+        return null;
+      }
+    } catch (error) {
+      console.error('통계 데이터 조회 실패:', error);
+      return null;
+    }
+  }
+
+  // 직무 목록 조회
+  async getJobs(): Promise<any[]> {
+    try {
+      console.log('직무 목록 조회 시작');
+      
+      const response = await fetch('/api/odoo/jobs');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('직무 목록 조회 결과:', result);
+      
+      if (result.success && Array.isArray(result.data)) {
+        return result.data;
+      } else {
+        console.error('직무 데이터가 올바르지 않습니다:', result);
+        return [];
+      }
+    } catch (error) {
+      console.error('직무 목록 조회 실패:', error);
       return [];
     }
   }

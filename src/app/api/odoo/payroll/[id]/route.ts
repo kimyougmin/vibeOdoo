@@ -2,83 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import xmlrpc from 'xmlrpc';
 import { getOdooConfig } from '@/lib/env';
 
-export async function GET() {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    // 환경변수에서 Odoo 설정 가져오기
-    const { url: ODOO_URL, database: DB, username: USER, password: PASS } = getOdooConfig();
-
-    console.log('XML-RPC 부서 조회 시작');
-    console.log('Odoo 설정:', { ODOO_URL, DB, USER });
-    
-    // XML-RPC 클라이언트 생성
-    const client = xmlrpc.createClient({ url: `${ODOO_URL}/xmlrpc/2/common` });
-
-    // 인증
-    const uid = await new Promise<number>((resolve, reject) => {
-      client.methodCall('authenticate', [DB, USER, PASS, {}], (error, value) => {
-        if (error) {
-          console.error('인증 실패:', error);
-          reject(error);
-        } else {
-          console.log('인증 성공, UID:', value);
-          resolve(value);
-        }
-      });
-    });
-
-    // Object 클라이언트 생성
-    const objectClient = xmlrpc.createClient({ url: `${ODOO_URL}/xmlrpc/2/object` });
-
-    // 부서 목록 조회
-    const departments = await new Promise<any[]>((resolve, reject) => {
-      console.log('부서 조회 XML-RPC 호출 시작');
-      objectClient.methodCall(
-        'execute',
-        [DB, uid, PASS, 'hr.department', 'search_read', 
-         [], // 모든 부서 조회 (active 필터 제거)
-         ['id', 'name', 'complete_name']], // 필수 필드만 조회
-        (error, value) => {
-          if (error) {
-            console.error('부서 조회 실패:', error);
-            console.error('에러 상세:', JSON.stringify(error, null, 2));
-            resolve([]); // 에러 시 빈 배열 반환
-          } else {
-            console.log('부서 조회 성공:', value);
-            console.log('부서 개수:', Array.isArray(value) ? value.length : 'not array');
-            resolve(Array.isArray(value) ? value : []);
-          }
-        }
-      );
-    });
-
-    console.log('최종 부서 데이터:', departments);
-
-    return NextResponse.json({
-      success: true,
-      data: departments
-    });
-
-  } catch (error) {
-    console.error('XML-RPC 부서 조회 에러:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: '부서 데이터 조회 실패', 
-        details: (error as Error).message 
-      }, 
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(request: NextRequest) {
-  try {
+    const payrollId = parseInt(params.id);
     const data = await request.json();
     
     // 환경변수에서 Odoo 설정 가져오기
     const { url: ODOO_URL, database: DB, username: USER, password: PASS } = getOdooConfig();
 
-    console.log('XML-RPC 부서 생성 시작:', data);
+    console.log('XML-RPC 급여 계약 수정 시작:', payrollId, data);
     
     // XML-RPC 클라이언트 생성
     const client = xmlrpc.createClient({ url: `${ODOO_URL}/xmlrpc/2/common` });
@@ -99,17 +34,17 @@ export async function POST(request: NextRequest) {
     // Object 클라이언트 생성
     const objectClient = xmlrpc.createClient({ url: `${ODOO_URL}/xmlrpc/2/object` });
 
-    // 부서 생성
-    const result = await new Promise<number>((resolve, reject) => {
+    // 급여 계약 수정
+    const result = await new Promise<boolean>((resolve, reject) => {
       objectClient.methodCall(
         'execute',
-        [DB, uid, PASS, 'hr.department', 'create', [data]],
+        [DB, uid, PASS, 'hr.contract', 'write', [payrollId], data],
         (error, value) => {
           if (error) {
-            console.error('부서 생성 실패:', error);
+            console.error('급여 계약 수정 실패:', error);
             reject(error);
           } else {
-            console.log('부서 생성 성공:', value);
+            console.log('급여 계약 수정 성공:', value);
             resolve(value);
           }
         }
@@ -122,11 +57,77 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('XML-RPC 부서 생성 에러:', error);
+    console.error('XML-RPC 급여 계약 수정 에러:', error);
     return NextResponse.json(
       { 
         success: false, 
-        error: '부서 생성 실패', 
+        error: '급여 계약 수정 실패', 
+        details: (error as Error).message 
+      }, 
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const payrollId = parseInt(params.id);
+    
+    // 환경변수에서 Odoo 설정 가져오기
+    const { url: ODOO_URL, database: DB, username: USER, password: PASS } = getOdooConfig();
+
+    console.log('XML-RPC 급여 계약 삭제 시작:', payrollId);
+    
+    // XML-RPC 클라이언트 생성
+    const client = xmlrpc.createClient({ url: `${ODOO_URL}/xmlrpc/2/common` });
+
+    // 인증
+    const uid = await new Promise<number>((resolve, reject) => {
+      client.methodCall('authenticate', [DB, USER, PASS, {}], (error, value) => {
+        if (error) {
+          console.error('인증 실패:', error);
+          reject(error);
+        } else {
+          console.log('인증 성공, UID:', value);
+          resolve(value);
+        }
+      });
+    });
+
+    // Object 클라이언트 생성
+    const objectClient = xmlrpc.createClient({ url: `${ODOO_URL}/xmlrpc/2/object` });
+
+    // 급여 계약 삭제
+    const result = await new Promise<boolean>((resolve, reject) => {
+      objectClient.methodCall(
+        'execute',
+        [DB, uid, PASS, 'hr.contract', 'unlink', [payrollId]],
+        (error, value) => {
+          if (error) {
+            console.error('급여 계약 삭제 실패:', error);
+            reject(error);
+          } else {
+            console.log('급여 계약 삭제 성공:', value);
+            resolve(value);
+          }
+        }
+      );
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: result
+    });
+
+  } catch (error) {
+    console.error('XML-RPC 급여 계약 삭제 에러:', error);
+    return NextResponse.json(
+      { 
+        success: false, 
+        error: '급여 계약 삭제 실패', 
         details: (error as Error).message 
       }, 
       { status: 500 }

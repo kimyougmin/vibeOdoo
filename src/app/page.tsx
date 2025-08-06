@@ -1,20 +1,45 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Employee, Department } from '@/types/odoo';
-import { createOdooAPI, getOdooAPI } from '@/lib/odoo-api';
-import { getOdooConfig } from '@/lib/env';
+import { useState, useEffect } from 'react';
+import { createOdooAPI } from '@/lib/odoo-api';
 import EmployeeList from '@/components/EmployeeList';
 import EmployeeDetail from '@/components/EmployeeDetail';
 import DepartmentList from '@/components/DepartmentList';
+import Dashboard from '@/components/Dashboard';
+import OrgChart from '@/components/OrgChart';
+import PayrollManagement from '@/components/PayrollManagement';
+import EmployeeManagement from '@/components/EmployeeManagement';
+import DepartmentManagement from '@/components/DepartmentManagement';
+import OrgChartManagement from '@/components/OrgChartManagement';
+import { Employee, Department } from '@/types/odoo';
 
-type ViewMode = 'employees' | 'departments' | 'employee-detail';
+// 클라이언트 사이드에서 환경변수 가져오기
+function getClientEnvVars() {
+  const url = process.env.NEXT_PUBLIC_ODOO_URL;
+  const database = process.env.NEXT_PUBLIC_ODOO_DATABASE;
+  const username = process.env.NEXT_PUBLIC_ODOO_USERNAME;
+  const password = process.env.NEXT_PUBLIC_ODOO_PASSWORD;
+
+  if (!url || !database || !username || !password) {
+    throw new Error('환경변수가 설정되지 않았습니다. .env.local 파일을 확인해주세요.');
+  }
+
+  return {
+    url,
+    database,
+    username,
+    password,
+  }
+}
 
 export default function Home() {
+  const [isApiInitialized, setIsApiInitialized] = useState(false);
+  const [viewMode, setViewMode] = useState<'dashboard' | 'employees' | 'departments' | 'org-chart' | 'payroll' | 'employee-detail'>('dashboard');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>('employees');
-  const [isApiInitialized, setIsApiInitialized] = useState(false);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     initializeOdooAPI();
@@ -22,15 +47,8 @@ export default function Home() {
 
   const initializeOdooAPI = async () => {
     try {
-      // 환경변수 검증 및 Odoo API 초기화
-      const { url, database, username, password } = getOdooConfig();
-
-      const auth = {
-        url,
-        database,
-        username,
-        password,
-      };
+      // 클라이언트 사이드에서 환경변수 가져오기
+      const auth = getClientEnvVars();
 
       const api = createOdooAPI(auth);
       const loginSuccess = await api.login();
@@ -58,13 +76,16 @@ export default function Home() {
 
   const handleBackToList = () => {
     setSelectedEmployee(null);
-    setViewMode('employees');
+    setViewMode('dashboard');
   };
 
-  const handleViewModeChange = (mode: ViewMode) => {
+  const handleViewModeChange = (mode: 'dashboard' | 'employees' | 'departments' | 'org-chart' | 'payroll' | 'employee-detail') => {
     setViewMode(mode);
-    setSelectedEmployee(null);
-    setSelectedDepartment(null);
+    if (mode === 'employee-detail' && selectedEmployee) {
+      // 이미 선택된 직원이 있으면 그대로 유지
+    } else {
+      setSelectedEmployee(null);
+    }
   };
 
   if (!isApiInitialized) {
@@ -97,6 +118,16 @@ export default function Home() {
             <div className="flex items-center space-x-4">
               <nav className="flex space-x-4">
                 <button
+                  onClick={() => handleViewModeChange('dashboard')}
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    viewMode === 'dashboard'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  대시보드
+                </button>
+                <button
                   onClick={() => handleViewModeChange('employees')}
                   className={`px-3 py-2 rounded-md text-sm font-medium ${
                     viewMode === 'employees'
@@ -116,6 +147,26 @@ export default function Home() {
                 >
                   부서 관리
                 </button>
+                <button
+                  onClick={() => handleViewModeChange('org-chart')}
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    viewMode === 'org-chart'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  조직도
+                </button>
+                <button
+                  onClick={() => handleViewModeChange('payroll')}
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    viewMode === 'payroll'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  급여 관리
+                </button>
               </nav>
             </div>
           </div>
@@ -131,114 +182,27 @@ export default function Home() {
               onBack={handleBackToList}
             />
           ) : viewMode === 'departments' ? (
-            <DepartmentList onDepartmentSelect={handleDepartmentSelect} />
+            <DepartmentManagement />
+          ) : viewMode === 'org-chart' ? (
+            <OrgChartManagement />
+          ) : viewMode === 'payroll' ? (
+            <PayrollManagement />
+          ) : viewMode === 'employees' ? (
+            <EmployeeManagement />
           ) : (
             <div className="space-y-6">
-              {/* 통계 카드 */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white overflow-hidden shadow rounded-lg">
-                  <div className="p-5">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
-                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                          </svg>
-                        </div>
-                      </div>
-                      <div className="ml-5 w-0 flex-1">
-                        <dl>
-                          <dt className="text-sm font-medium text-gray-500 truncate">
-                            총 직원 수
-                          </dt>
-                          <dd className="text-lg font-medium text-gray-900">
-                            {/* 실제 데이터로 교체 필요 */}
-                            2명
-                          </dd>
-                        </dl>
-                      </div>
-                    </div>
-                  </div>
+              {/* 통계 대시보드 */}
+              <Dashboard />
+              
+              {/* 직원 목록 */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900">직원 목록</h2>
                 </div>
-
-                <div className="bg-white overflow-hidden shadow rounded-lg">
-                  <div className="p-5">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                          </svg>
-                        </div>
-                      </div>
-                      <div className="ml-5 w-0 flex-1">
-                        <dl>
-                          <dt className="text-sm font-medium text-gray-500 truncate">
-                            총 부서 수
-                          </dt>
-                          <dd className="text-lg font-medium text-gray-900">
-                            {/* 실제 데이터로 교체 필요 */}
-                            1개
-                          </dd>
-                        </dl>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white overflow-hidden shadow rounded-lg">
-                  <div className="p-5">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <div className="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
-                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </div>
-                      </div>
-                      <div className="ml-5 w-0 flex-1">
-                        <dl>
-                          <dt className="text-sm font-medium text-gray-500 truncate">
-                            오늘 출근
-                          </dt>
-                          <dd className="text-lg font-medium text-gray-900">
-                            {/* 실제 데이터로 교체 필요 */}
-                            1명
-                          </dd>
-                        </dl>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white overflow-hidden shadow rounded-lg">
-                  <div className="p-5">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <div className="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center">
-                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                      </div>
-                      <div className="ml-5 w-0 flex-1">
-                        <dl>
-                          <dt className="text-sm font-medium text-gray-500 truncate">
-                            연차 사용
-                          </dt>
-                          <dd className="text-lg font-medium text-gray-900">
-                            {/* 실제 데이터로 교체 필요 */}
-                            0명
-                          </dd>
-                        </dl>
-                      </div>
-                    </div>
-                  </div>
+                <div className="p-6">
+                  <EmployeeList onEmployeeSelect={handleEmployeeSelect} />
                 </div>
               </div>
-
-              {/* 직원 목록 */}
-              <EmployeeList onEmployeeSelect={handleEmployeeSelect} />
             </div>
           )}
         </div>

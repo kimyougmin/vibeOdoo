@@ -34,6 +34,8 @@ export interface Employee {
   work_contact_id?: [number, string];
   create_date?: string;
   write_date?: string;
+  gender?: string;
+  contract_ids?: any[];
 }
 
 export interface Department {
